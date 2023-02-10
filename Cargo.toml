@@ -1,7 +1,13 @@
 [package]
 name = "regular"
+description = "Regular Expression Manipulation and Analysis"
 version = "0.1.0"
 edition = "2021"
+
+authors = ["Andrew Aylett <andrew@aylett.co.uk>"]
+license = "Apache-2.0"
+homepage = "https://github.com/andrewaylett/regular"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
