@@ -45,8 +45,9 @@ impl<'a> Tokenise<'a> for &'a String {
 
 #[cfg(test)]
 mod test {
-    use crate::tokens::{Token, Tokenise};
     use rstest::rstest;
+
+    use crate::tokens::{Token, Tokenise};
 
     #[rstest]
     #[case("a", vec![Token::Raw('a')])]

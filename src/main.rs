@@ -21,17 +21,21 @@
 #![forbid(unsafe_code)]
 #![doc = include_str!("../README.md")]
 
-use clap::Parser;
+use std::process::ExitCode;
 
+use anyhow::Result;
+use clap::Parser;
 use regular::{enumerate, example};
 
-fn main() {
+fn main() -> Result<ExitCode> {
     let args = Opt::parse();
 
     match args {
         Opt::Example(o) => example(o.expression),
         Opt::Enumerate(o) => enumerate(o.expression),
-    }
+    }?;
+
+    Ok(ExitCode::SUCCESS)
 }
 
 #[derive(Parser, Debug)]

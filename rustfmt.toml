@@ -1,0 +1,11 @@
+newline_style = "Unix"
+use_field_init_shorthand = true
+
+# Unstable at time of writing
+# But also idempotent with stable options
+# Run `cargo +nightly fmt` occasionally
+imports_granularity = "Module"
+group_imports = "StdExternalCrate"
+normalize_doc_attributes = true
+reorder_impl_items = true
+unstable_features = true

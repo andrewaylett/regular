@@ -17,6 +17,7 @@ repos:
     rev: "v1.0"
     hooks:
       - id: fmt
+      - id: clippy
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: "2.6.1"
     hooks:

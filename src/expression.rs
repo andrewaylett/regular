@@ -1,5 +1,6 @@
-use itertools::Itertools;
 use std::fmt::Debug;
+
+use itertools::Itertools;
 
 trait ClonableStringIterator: Iterator + Clone {}
 

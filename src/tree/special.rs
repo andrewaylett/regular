@@ -1,5 +1,6 @@
-use crate::tokens::Token;
 use anyhow::anyhow;
+
+use crate::tokens::Token;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) enum Special {

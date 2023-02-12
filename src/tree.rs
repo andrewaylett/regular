@@ -1,9 +1,11 @@
+use std::mem::take;
+
+use anyhow::{anyhow, Result};
+
 use crate::tokens::Token;
 use crate::tree::brackets::Bracket;
 use crate::tree::classify::{Classify, TokenClass};
 use crate::tree::special::Special;
-use anyhow::{anyhow, Result};
-use std::mem::take;
 
 mod brackets;
 mod classify;
@@ -321,13 +323,14 @@ pub(crate) fn tree<T: IntoIterator<Item = Token>>(tokens: T) -> Result<Node> {
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod test {
+    use lazy_static::lazy_static;
+    use rstest::rstest;
+
     use crate::tokens::Token::*;
     use crate::tokens::{Token, Tokenise};
     use crate::tree::special::Special::Star;
     use crate::tree::Node::*;
     use crate::tree::{tree, Bracket, Node};
-    use lazy_static::lazy_static;
-    use rstest::rstest;
 
     lazy_static! {
         static ref STAR: Node = Bracketed(

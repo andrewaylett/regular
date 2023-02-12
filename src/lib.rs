@@ -21,31 +21,33 @@
 #![forbid(unsafe_code)]
 #![doc = include_str!("../README.md")]
 
-use crate::expression::Expression;
+use anyhow::{Context, Result};
 
+use crate::expression::Expression;
 use crate::tokens::Tokenise;
 use crate::tree::tree;
-use anyhow::Result;
 
 mod expression;
 mod parse;
 mod tokens;
 mod tree;
 
-pub fn example(expression: String) {
+pub fn example(expression: String) -> Result<()> {
     let example = parse(expression)
-        .expect("Failed to parse expression")
+        .context("Failed to parse expression")?
         .example();
-    println!("{example}")
+    println!("{example}");
+    Ok(())
 }
 
-pub fn enumerate(expression: String) {
+pub fn enumerate(expression: String) -> Result<()> {
     for example in parse(expression)
-        .expect("Failed to parse expression")
+        .context("Failed to parse expression")?
         .enumerate()
     {
         println!("{example}")
     }
+    Ok(())
 }
 
 fn parse(expression: String) -> Result<Box<dyn Expression>> {
