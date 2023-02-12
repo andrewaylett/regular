@@ -3,6 +3,7 @@ name = "regular"
 description = "Regular Expression Manipulation and Analysis"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.64"
 
 authors = ["Andrew Aylett <andrew@aylett.co.uk>"]
 license = "Apache-2.0"
