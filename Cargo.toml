@@ -15,7 +15,7 @@ readme = "README.md"
 [dependencies]
 regex = "1.7.1"
 
-anyhow = "1.0.68"
+anyhow = "1.0.69"
 thiserror = "1.0.38"
 
 lazy_static = "1.4.0"
