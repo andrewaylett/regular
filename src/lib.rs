@@ -21,6 +21,9 @@
 #![forbid(unsafe_code)]
 #![doc = include_str!("../README.md")]
 
+#[macro_use]
+mod macros;
+
 use anyhow::{Context, Result};
 
 use crate::expression::Expression;
@@ -32,6 +35,7 @@ mod parse;
 mod tokens;
 mod tree;
 
+/// Provides an example from the regular language described by the expression
 pub fn example(expression: String) -> Result<()> {
     let example = parse(expression)
         .context("Failed to parse expression")?
@@ -40,6 +44,7 @@ pub fn example(expression: String) -> Result<()> {
     Ok(())
 }
 
+/// Provides a (non-exhaustive) enumeration of the members of the regular language described by the expression
 pub fn enumerate(expression: String) -> Result<()> {
     for example in parse(expression)
         .context("Failed to parse expression")?
@@ -52,6 +57,7 @@ pub fn enumerate(expression: String) -> Result<()> {
 
 fn parse(expression: String) -> Result<Box<dyn Expression>> {
     let tokens = expression.tokenise();
-    let _tree = tree(tokens)?;
-    unimplemented!()
+    let tree = tree(tokens)?;
+    let expression = parse::parse(&tree)?;
+    Ok(expression)
 }

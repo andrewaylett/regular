@@ -7,6 +7,16 @@ pub(crate) enum Token {
     TrailingEscapeCharacter,
 }
 
+impl Token {
+    pub(crate) fn to_char(self) -> char {
+        match self {
+            Token::Escaped(c) => c,
+            Token::Raw(c) => c,
+            Token::TrailingEscapeCharacter => '\\',
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct TokenIterator<'a>(Chars<'a>);
 

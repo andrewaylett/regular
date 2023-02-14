@@ -7,24 +7,13 @@ use crate::tree::brackets::Bracket;
 use crate::tree::classify::{Classify, TokenClass};
 use crate::tree::special::Special;
 
-mod brackets;
+pub(crate) mod brackets;
 mod classify;
-mod special;
+pub(crate) mod special;
 
-#[cfg(test)]
-macro_rules! trace {
-    ($($arg:tt)*) => {{
-        println!($($arg)*);
-    }}
-}
-
-#[cfg(not(test))]
-macro_rules! trace {
-    ($($arg:tt)*) => {{}};
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub(crate) enum Node {
+    #[default]
     Empty,
     Sequence(Vec<Node>),
     Tokens(Vec<Token>),
@@ -34,25 +23,14 @@ pub(crate) enum Node {
     Alternate(Box<Node>, Box<Node>),
 }
 
-impl Default for Node {
-    fn default() -> Self {
-        Node::Empty
-    }
-}
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 enum PartialNode {
+    #[default]
     Empty,
     Sequence(Vec<Node>),
     Tokens(Vec<Token>),
     Bracketed(Bracket),
     Alternate(Box<Node>),
-}
-
-impl Default for PartialNode {
-    fn default() -> Self {
-        PartialNode::Empty
-    }
 }
 
 impl PartialNode {
@@ -102,38 +80,32 @@ trait AppendChild {
     fn append_child(&mut self, new: Node) -> Result<()>;
 }
 
-impl AppendChild for PartialNode {
-    fn append_child(&mut self, new: Node) -> Result<()> {
-        match self {
-            PartialNode::Sequence(s) => {
-                s.push(new);
-                Ok(())
-            }
-            _ => Err(anyhow!("Can't append to {self:?}")),
-        }
-    }
-}
-
 impl AppendChild for Vec<PartialNode> {
     fn append_child(&mut self, new: Node) -> Result<()> {
+        trace!("Append Child, stack: {self:?}, child: {new:?}");
         if let Some(mut containing_partial) = self.pop() {
-            match containing_partial {
+            match &mut containing_partial {
                 PartialNode::Empty => self.push(PartialNode::Sequence(vec![new])),
-                PartialNode::Sequence(_) => containing_partial.append_child(new)?,
+                PartialNode::Sequence(sequence) => {
+                    sequence.push(new);
+                    self.push(containing_partial);
+                }
                 PartialNode::Tokens(tokens) => {
-                    self.push(PartialNode::Sequence(vec![Node::Tokens(tokens), new]))
+                    self.push(PartialNode::Sequence(vec![Node::Tokens(take(tokens)), new]))
                 }
                 PartialNode::Bracketed(_) => {
                     self.push(containing_partial);
                     self.push(PartialNode::Sequence(vec![new]));
                 }
                 PartialNode::Alternate(first) => {
-                    self.append_child(Node::Alternate(first, Box::new(new)))?;
+                    self.append_child(Node::Alternate(take(first), Box::new(new)))?;
                 }
             }
         } else {
             self.push(PartialNode::Sequence(vec![new]))
         }
+
+        trace!("Appended Child, stack: {self:?}");
         Ok(())
     }
 }
@@ -315,6 +287,8 @@ pub(crate) fn tree<T: IntoIterator<Item = Token>>(tokens: T) -> Result<Node> {
         },
     )?;
 
+    assert!(!stack.is_empty());
+
     stack
         .into_iter()
         .try_rfold(Node::Empty, |node, partial| partial.end_with(node))
@@ -347,6 +321,7 @@ mod test {
 
     #[rstest]
     #[case("a", &Node::Tokens(vec![Token::Raw('a')]))]
+    #[case("ab*", &Sequence(vec![Tokens(vec![Raw('a')]), Augmented(Box::new(Tokens(vec![Raw('b')])), Box::new(Special(Star)))]))]
     #[case("a|", &Alternate(Box::new(Tokens(vec![Raw('a')])), Box::new(Empty)))]
     #[case("|a", &Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a')]))))]
     #[case("(|a)", &Bracketed(Bracket::Parentheses, Box::new(Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a')]))))))]

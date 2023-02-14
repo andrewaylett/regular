@@ -10,7 +10,7 @@ pub(crate) trait Expression: Debug {
 }
 
 #[derive(Debug)]
-pub(crate) struct Literal(String);
+pub(crate) struct Literal(pub(crate) String);
 
 impl Expression for Literal {
     fn example(&self) -> String {
@@ -28,6 +28,7 @@ pub(crate) enum ControlFlow {
     Alternate(Vec<Box<dyn Expression>>),
     Optional(Box<dyn Expression>),
     Star(Box<dyn Expression>),
+    Sequence(Vec<Box<dyn Expression>>),
 }
 
 impl Expression for ControlFlow {
@@ -36,6 +37,7 @@ impl Expression for ControlFlow {
             ControlFlow::Alternate(v) => v[0].example(),
             ControlFlow::Optional(e) => e.example(),
             ControlFlow::Star(e) => e.example(),
+            ControlFlow::Sequence(v) => v.iter().map(|e| e.example()).collect(),
         }
     }
 
@@ -49,6 +51,15 @@ impl Expression for ControlFlow {
                         .cartesian_product(e.enumerate().collect::<Vec<_>>())
                         .map(|(a, b)| format!("{a}{b}")),
                 ),
+            ),
+            ControlFlow::Sequence(v) => v.iter().fold(
+                Box::new(vec!["".to_string()].into_iter()),
+                |prev: Box<dyn Iterator<Item = String>>, expr| {
+                    Box::new(
+                        prev.cartesian_product(expr.enumerate().collect::<Vec<_>>())
+                            .map(|(a, b)| format!("{a}{b}")),
+                    )
+                },
             ),
         };
     }
