@@ -9,6 +9,7 @@ authors = ["Andrew Aylett <andrew@aylett.co.uk>"]
 license = "Apache-2.0"
 homepage = "https://github.com/andrewaylett/regular"
 readme = "README.md"
+documentation = "https://docs.rs/regular"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
