@@ -14,13 +14,10 @@ documentation = "https://docs.rs/regular"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.7.1"
-
-anyhow = { version = "1.0.69", features=["backtrace"] }
+anyhow = "1.0.69"
 thiserror = "1.0.38"
 
 lazy_static = "1.4.0"
-futures = "0.3.26"
 itertools = "0.10.5"
 
 clap = { version="4.1.6", features=["derive"] }

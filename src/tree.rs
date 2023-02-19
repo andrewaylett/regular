@@ -37,32 +37,24 @@ impl PartialNode {
     fn end_with(self, terminator: Node) -> Result<Node> {
         match self {
             PartialNode::Empty => Ok(terminator),
-            PartialNode::Sequence(mut sequence) => match terminator {
-                Node::Empty
-                | Node::Tokens(_)
-                | Node::Bracketed(_, _)
-                | Node::Augmented(_, _)
-                | Node::Alternate(_, _) => {
-                    if sequence.is_empty() {
-                        Ok(terminator)
-                    } else {
-                        if terminator != Node::Empty {
-                            sequence.push(terminator);
-                        }
-                        if let Some((first, rest)) = sequence.split_first_mut() {
-                            if rest.is_empty() {
-                                Ok(take(first))
-                            } else {
-                                Ok(Node::Sequence(sequence))
-                            }
+            PartialNode::Sequence(mut sequence) => {
+                if let Node::Sequence(_) = terminator {
+                    Err(anyhow!("Can't nest sequences"))
+                } else {
+                    if terminator != Node::Empty {
+                        sequence.push(terminator);
+                    }
+                    if let Some((first, rest)) = sequence.split_first_mut() {
+                        if rest.is_empty() {
+                            Ok(take(first))
                         } else {
-                            Ok(Node::Empty)
+                            Ok(Node::Sequence(sequence))
                         }
+                    } else {
+                        Ok(Node::Empty)
                     }
                 }
-                Node::Sequence(_) => Err(anyhow!("Can't nest sequences")),
-                Node::Special(_) => Err(anyhow!("Can't nest {terminator:?} inside a Sequence")),
-            },
+            }
             PartialNode::Tokens(t) => {
                 if Node::Empty == terminator {
                     Ok(Node::Tokens(t))
@@ -298,10 +290,11 @@ pub(crate) fn tree<T: IntoIterator<Item = Token>>(tokens: T) -> Result<Node> {
 #[allow(clippy::expect_used)]
 mod test {
     use lazy_static::lazy_static;
+    use pretty_assertions::assert_eq;
     use rstest::rstest;
 
     use crate::tokens::Token::*;
-    use crate::tokens::{Token, Tokenise};
+    use crate::tokens::{Token, TokenMeta, Tokenise};
     use crate::tree::special::Special::Star;
     use crate::tree::Node::*;
     use crate::tree::{tree, Bracket, Node};
@@ -312,7 +305,10 @@ mod test {
             Box::new(Augmented(
                 Box::new(Bracketed(
                     Bracket::Parentheses,
-                    Box::new(Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a')]))))
+                    Box::new(Alternate(
+                        Box::new(Empty),
+                        Box::new(Tokens(vec![Raw('a', TokenMeta { position: 3 })]))
+                    ))
                 )),
                 Box::new(Special(Star))
             ))
@@ -320,13 +316,13 @@ mod test {
     }
 
     #[rstest]
-    #[case("a", &Node::Tokens(vec![Token::Raw('a')]))]
-    #[case("ab*", &Sequence(vec![Tokens(vec![Raw('a')]), Augmented(Box::new(Tokens(vec![Raw('b')])), Box::new(Special(Star)))]))]
-    #[case("a|", &Alternate(Box::new(Tokens(vec![Raw('a')])), Box::new(Empty)))]
-    #[case("|a", &Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a')]))))]
-    #[case("(|a)", &Bracketed(Bracket::Parentheses, Box::new(Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a')]))))))]
+    #[case("a", &Node::Tokens(vec![Token::Raw('a', TokenMeta {position: 0})]))]
+    #[case("ab*", &Sequence(vec![Tokens(vec![Raw('a', TokenMeta {position: 0})]), Augmented(Box::new(Tokens(vec![Raw('b', TokenMeta {position: 1})])), Box::new(Special(Star)))]))]
+    #[case("a|", &Alternate(Box::new(Tokens(vec![Raw('a', TokenMeta {position: 0})])), Box::new(Empty)))]
+    #[case("|a", &Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a', TokenMeta {position: 1})]))))]
+    #[case("(|a)", &Bracketed(Bracket::Parentheses, Box::new(Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a', TokenMeta {position: 2})]))))))]
     #[case("((|a)*)", &STAR)]
-    #[case("(|a\\))", &Bracketed(Bracket::Parentheses, Box::new(Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a'),Escaped(')')]))))))]
+    #[case("(|a\\))", &Bracketed(Bracket::Parentheses, Box::new(Alternate(Box::new(Empty), Box::new(Tokens(vec![Raw('a', TokenMeta {position: 2}),Escaped(')', TokenMeta {position: 3})]))))))]
     #[case("[*]", &Bracketed(Bracket::Square, Box::new(Special(Star))))]
     fn test_tree(#[case] input: String, #[case] expected: &Node) {
         let tokens = input.tokenise();

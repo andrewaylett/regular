@@ -17,15 +17,15 @@ pub(crate) trait Classify {
 impl Classify for Token {
     fn classify(&self) -> TokenClass {
         match self {
-            Token::Escaped(_) => TokenClass::Regular,
-            Token::Raw(c) => match c {
+            Token::Escaped(..) => TokenClass::Regular,
+            Token::Raw(c, ..) => match c {
                 '(' | '[' | '{' => TokenClass::OpenBracket,
                 ')' | ']' | '}' => TokenClass::CloseBracket,
                 '*' | '?' => TokenClass::Augmentation,
                 '|' => TokenClass::Alternation,
                 _ => TokenClass::Regular,
             },
-            Token::TrailingEscapeCharacter => TokenClass::Problematic,
+            Token::TrailingEscapeCharacter(..) => TokenClass::Problematic,
         }
     }
 }
