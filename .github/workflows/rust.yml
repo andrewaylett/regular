@@ -79,7 +79,6 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: false
 
       - uses: actions/cache@v3
         id: cache-registry
