@@ -1,12 +1,15 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v4.4.0"
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-        exclude: ^\.idea
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-yaml
@@ -36,3 +39,11 @@ repos:
       - id: prettier
         exclude_types:
           - rust
+  - repo: local
+    hooks:
+      - id: cargo-version-update
+        name: Check Cargo Versions
+        language: system
+        entry: cargo update -w
+        pass_filenames: false
+        files: "Cargo\\.(lock|toml)"
