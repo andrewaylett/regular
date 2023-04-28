@@ -173,7 +173,7 @@ pub(crate) fn tree<T: IntoIterator<Item = Token>>(tokens: T) -> Result<Node> {
                             stack.push(PartialNode::Tokens(vec![token]));
                             Ok(stack)
                         }
-                        TokenClass::Problematic => return Err(anyhow!("Unexpected escape")),
+                        TokenClass::Problematic => Err(anyhow!("Unexpected escape")),
                         TokenClass::Alternation => {
                             stack.push(PartialNode::Alternate(Box::new(Node::Empty)));
                             stack.push(PartialNode::Empty);
