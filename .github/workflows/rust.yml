@@ -33,8 +33,9 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('~/.cargo/registry/index/**') }}-${{ hashFiles('~/.cargo/registry/cache/**') }}-${{ hashFiles('~/.cargo/git/db/**') }}
+          key: ${{ runner.os }}-cargo-registry-${{ steps.toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
+            ${{ runner.os }}-cargo-registry-${{ steps.toolchain.outputs.rustc_hash }}-
             ${{ runner.os }}-cargo-registry-
 
       - uses: actions/cache@v3
@@ -87,8 +88,9 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('~/.cargo/registry/index/**') }}-${{ hashFiles('~/.cargo/registry/cache/**') }}-${{ hashFiles('~/.cargo/git/db/**') }}
+          key: ${{ runner.os }}-cargo-registry-${{ steps.toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
+            ${{ runner.os }}-cargo-registry-${{ steps.toolchain.outputs.rustc_hash }}-
             ${{ runner.os }}-cargo-registry-
 
       - uses: actions/cache@v3
