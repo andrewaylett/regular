@@ -18,7 +18,7 @@ anyhow = "1.0.71"
 thiserror = "1.0.40"
 
 lazy_static = "1.4.0"
-itertools = "0.10.5"
+itertools = "0.11.0"
 
 clap = { version="4.3.8", features=["derive"] }
 
