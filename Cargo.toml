@@ -14,7 +14,7 @@ documentation = "https://docs.rs/regular"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.72"
+anyhow = "1.0.81"
 thiserror = "1.0.44"
 
 lazy_static = "1.4.0"
